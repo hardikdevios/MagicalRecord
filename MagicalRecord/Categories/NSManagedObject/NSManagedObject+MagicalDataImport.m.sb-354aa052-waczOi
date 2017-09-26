@@ -243,17 +243,6 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
     return YES;
 }
 
-- (id) MR_changeImport:(id)objectData;
-{
-    if ([self respondsToSelector:@selector(changeImport:)])
-    {
-        return [self changeImport:objectData];
-    }
-
-    return objectData;
-    
-}
-
 - (BOOL) MR_postImport:(id)objectData;
 {
     if ([self respondsToSelector:@selector(didImport:)])
@@ -268,14 +257,14 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
 {
     BOOL didStartimporting = [self MR_preImport:objectData];
     if (!didStartimporting) return NO;
-    id data = [self MR_changeImport:objectData];
+    
     NSDictionary *attributes = [[self entity] attributesByName];
-    [self MR_setAttributes:attributes forKeysWithObject:data];
+    [self MR_setAttributes:attributes forKeysWithObject:objectData];
     
     NSDictionary *relationships = [[self entity] relationshipsByName];
-    [self MR_setRelationships:relationships forKeysWithObject:data withBlock:relationshipBlock];
+    [self MR_setRelationships:relationships forKeysWithObject:objectData withBlock:relationshipBlock];
     
-    return [self MR_postImport:data];
+    return [self MR_postImport:objectData];  
 }
 
 - (BOOL)MR_importValuesForKeysWithObject:(id)objectData

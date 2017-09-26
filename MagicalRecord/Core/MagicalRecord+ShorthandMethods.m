@@ -89,7 +89,8 @@ static BOOL MRAddShorthandMethodForPrefixedInstanceMethod(Class objectClass, SEL
 {
     NSString *originalSelectorString = NSStringFromSelector(originalSelector);
 
-    if ([originalSelectorString hasPrefix:prefix] == NO)
+    if ([originalSelectorString hasPrefix:prefix] == NO &&
+        ([originalSelectorString hasPrefix:@"_"] || [originalSelectorString hasPrefix:@"init"]))
     {
         NSString *prefixedSelector = [prefix stringByAppendingString:originalSelectorString];
         Method existingMethod = class_getInstanceMethod(objectClass, NSSelectorFromString(prefixedSelector));
