@@ -14,21 +14,37 @@
 
 @implementation NSEntityDescription (MagicalRecord_DataImport)
 
-- (NSAttributeDescription *) MR_primaryAttributeToRelateBy;
+- (NSArray *) MR_primaryAttributeToRelateBy;
 {
-    NSString *lookupKey = [[self userInfo] objectForKey:kMagicalRecordImportRelationshipLinkedByKey] ?: MR_primaryKeyNameFromString([self name]);
-    NSAttributeDescription *attributeDescription = [self MR_attributeDescriptionForName:lookupKey];
+    
+    NSMutableArray *attributeDescriptions = [NSMutableArray array];
+    for (int i = 0; i < 2; i++) {
+        
+        NSString *key = i == 0 ? kMagicalRecordImportRelationshipLinkedByKey : [NSString stringWithFormat:@"%@.%d",kMagicalRecordImportRelationshipLinkedByKey,i];
+        
+        
+        NSString *lookupKey = [[self userInfo] objectForKey:key];
+        
+        if (lookupKey == nil) {
+            continue;
+        }
+        NSAttributeDescription *attributeDescription = [self MR_attributeDescriptionForName:lookupKey];
+        
+        if (attributeDescription == nil)
+        {
+            MRLogError(
+                       @"Invalid value for key '%@' in '%@' entity. Remove this key or add attribute '%@'\n",
+                       kMagicalRecordImportRelationshipLinkedByKey,
+                       self.name,
+                       lookupKey);
+        }
+        
+        [attributeDescriptions addObject:attributeDescription];
 
-    if (attributeDescription == nil)
-    {
-        MRLogError(
-            @"Invalid value for key '%@' in '%@' entity. Remove this key or add attribute '%@'\n",
-            kMagicalRecordImportRelationshipLinkedByKey,
-            self.name,
-            lookupKey);
+        
     }
-
-    return attributeDescription;
+   
+    return attributeDescriptions;
 }
 
 - (NSManagedObject *) MR_createInstanceInContext:(NSManagedObjectContext *)context;

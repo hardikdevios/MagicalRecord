@@ -63,6 +63,7 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
         
         if (lookupKeyPath) 
         {
+            
             id value = [attributeInfo MR_valueForKeyPath:lookupKeyPath fromObjectData:objectData];
             if (![self MR_importValue:value forKey:attributeName])
             {
@@ -223,7 +224,16 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
         }
     }
 }
-
+- (id) MR_changeImport:(id)objectData;
+{
+    if ([self respondsToSelector:@selector(changeImport:)])
+    {
+        return [self changeImport:objectData];
+    }
+    
+    return objectData;
+    
+}
 - (BOOL) MR_preImport:(id)objectData;
 {
     if ([self respondsToSelector:@selector(shouldImport:)])
@@ -243,17 +253,6 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
     return YES;
 }
 
-- (id) MR_changeImport:(id)objectData;
-{
-    if ([self respondsToSelector:@selector(changeImport:)])
-    {
-        return [self changeImport:objectData];
-    }
-
-    return objectData;
-    
-}
-
 - (BOOL) MR_postImport:(id)objectData;
 {
     if ([self respondsToSelector:@selector(didImport:)])
@@ -268,14 +267,14 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
 {
     BOOL didStartimporting = [self MR_preImport:objectData];
     if (!didStartimporting) return NO;
-    id data = [self MR_changeImport:objectData];
+    
     NSDictionary *attributes = [[self entity] attributesByName];
-    [self MR_setAttributes:attributes forKeysWithObject:data];
+    [self MR_setAttributes:attributes forKeysWithObject:objectData];
     
     NSDictionary *relationships = [[self entity] relationshipsByName];
-    [self MR_setRelationships:relationships forKeysWithObject:data withBlock:relationshipBlock];
+    [self MR_setRelationships:relationships forKeysWithObject:objectData withBlock:relationshipBlock];
     
-    return [self MR_postImport:data];
+    return [self MR_postImport:objectData];  
 }
 
 - (BOOL)MR_importValuesForKeysWithObject:(id)objectData
@@ -317,12 +316,23 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
     __block NSManagedObject *managedObject;
 
     [context performBlockAndWait:^{
-        NSAttributeDescription *primaryAttribute = [[self MR_entityDescriptionInContext:context] MR_primaryAttributeToRelateBy];
+        NSArray *primaryAttributes = [[self MR_entityDescriptionInContext:context] MR_primaryAttributeToRelateBy];
 
-        if (primaryAttribute != nil)
+        if (primaryAttributes.count > 0)
         {
-            id value = [objectData MR_valueForAttribute:primaryAttribute];
-            managedObject = [self MR_findFirstByAttribute:[primaryAttribute name] withValue:value inContext:context];
+            
+            NSMutableArray *predicates = [NSMutableArray array];
+            
+            for (NSAttributeDescription *primaryAttribute in primaryAttributes) {
+                
+                id value = [objectData MR_valueForAttribute:primaryAttribute];
+               [predicates addObject:[NSPredicate predicateWithFormat:@"%K = %@",[primaryAttribute name],value]];
+
+            }
+            
+            NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+            
+            managedObject = [self MR_findFirstWithPredicate:predicate inContext:context];
         }
         if (managedObject == nil)
         {

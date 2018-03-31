@@ -54,3 +54,90 @@
 
 @end
 
+#pragma mark - Deprecated Methods — DO NOT USE
+@implementation MagicalRecord (ActionsDeprecated)
+
++ (void) saveUsingCurrentThreadContextWithBlock:(void (^)(NSManagedObjectContext *localContext))block completion:(MRSaveCompletionHandler)completion;
+{
+    NSManagedObjectContext *localContext = [NSManagedObjectContext MR_contextForCurrentThread];
+
+    [localContext performBlock:^{
+        [localContext MR_setWorkingName:NSStringFromSelector(_cmd)];
+
+        if (block) {
+            block(localContext);
+        }
+
+        [localContext MR_saveWithOptions:MRSaveParentContexts completion:completion];
+    }];
+}
+
++ (void) saveUsingCurrentThreadContextWithBlockAndWait:(void (^)(NSManagedObjectContext *localContext))block;
+{
+    NSManagedObjectContext *localContext = [NSManagedObjectContext MR_contextForCurrentThread];
+
+    [localContext performBlockAndWait:^{
+        [localContext MR_setWorkingName:NSStringFromSelector(_cmd)];
+
+        if (block) {
+            block(localContext);
+        }
+
+        [localContext MR_saveWithOptions:MRSaveParentContexts|MRSaveSynchronously completion:nil];
+    }];
+}
+
++ (void) saveInBackgroundWithBlock:(void(^)(NSManagedObjectContext *localContext))block
+{
+    [[self class] saveWithBlock:block completion:nil];
+}
+
++ (void) saveInBackgroundWithBlock:(void(^)(NSManagedObjectContext *localContext))block completion:(void(^)(void))completion
+{
+    NSManagedObjectContext *savingContext  = [NSManagedObjectContext MR_rootSavingContext];
+    NSManagedObjectContext *localContext = [NSManagedObjectContext MR_contextWithParent:savingContext];
+
+    [localContext performBlock:^{
+        [localContext MR_setWorkingName:NSStringFromSelector(_cmd)];
+
+        if (block)
+        {
+            block(localContext);
+        }
+
+        [localContext MR_saveToPersistentStoreAndWait];
+
+        if (completion)
+        {
+            completion();
+        }
+    }];
+}
+
++ (void) saveInBackgroundUsingCurrentContextWithBlock:(void (^)(NSManagedObjectContext *localContext))block completion:(void (^)(void))completion errorHandler:(void (^)(NSError *error))errorHandler;
+{
+    NSManagedObjectContext *localContext = [NSManagedObjectContext MR_contextForCurrentThread];
+
+    [localContext performBlock:^{
+        [localContext MR_setWorkingName:NSStringFromSelector(_cmd)];
+
+        if (block) {
+            block(localContext);
+        }
+
+        [localContext MR_saveToPersistentStoreWithCompletion:^(BOOL contextDidSave, NSError *error) {
+            if (contextDidSave) {
+                if (completion) {
+                    completion();
+                }
+            }
+            else {
+                if (errorHandler) {
+                    errorHandler(error);
+                }
+            }
+        }];
+    }];
+}
+
+@end

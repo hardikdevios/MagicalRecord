@@ -51,7 +51,6 @@
                  attributeType == NSDecimalAttributeType ||
                  attributeType == NSDoubleAttributeType ||
                  attributeType == NSFloatAttributeType) {
-            
             if (![value isKindOfClass:[NSNumber class]] && value != [NSNull null]) {
                 value = MR_numberFromString([value description]);
             }

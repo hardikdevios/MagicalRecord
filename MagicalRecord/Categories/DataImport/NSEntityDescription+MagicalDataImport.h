@@ -11,7 +11,7 @@
 
 @interface NSEntityDescription (MagicalRecord_DataImport)
 
-- (MR_nullable NSAttributeDescription *) MR_primaryAttributeToRelateBy;
+- (MR_nullable NSArray *) MR_primaryAttributeToRelateBy;
 - (MR_nonnull NSManagedObject *) MR_createInstanceInContext:(MR_nonnull NSManagedObjectContext *)context;
 
 /**

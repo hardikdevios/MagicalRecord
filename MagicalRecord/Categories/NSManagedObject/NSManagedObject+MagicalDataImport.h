@@ -23,8 +23,8 @@ OBJC_EXPORT NSString * __MR_nonnull const kMagicalRecordImportRelationshipTypeKe
 @optional
 - (BOOL) shouldImport:(MR_nonnull id)data;
 - (void) willImport:(MR_nonnull id)data;
-- (MR_nonnull id) changeImport:(MR_nonnull id)data;
 - (void) didImport:(MR_nonnull id)data;
+- (MR_nonnull id) changeImport:(MR_nonnull id)data;
 
 @end
 

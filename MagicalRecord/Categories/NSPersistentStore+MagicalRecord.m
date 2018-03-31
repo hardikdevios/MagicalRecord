@@ -58,6 +58,10 @@ static NSPersistentStore *defaultPersistentStore_ = nil;
     return cloudURL;
 }
 
++ (NSURL *) MR_cloudURLForUbiqutiousContainer:(NSString *)bucketName;
+{
+    return [self MR_cloudURLForUbiquitousContainer:bucketName];
+}
 
 + (NSURL *) MR_defaultLocalStoreUrl
 {
