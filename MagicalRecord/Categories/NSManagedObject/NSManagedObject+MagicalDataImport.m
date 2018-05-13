@@ -332,7 +332,7 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
 
             }
             
-            NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+            NSPredicate *predicate = [NSCompoundPredicate orPredicateWithSubpredicates:predicates];
             
             managedObject = [self MR_findFirstWithPredicate:predicate inContext:context];
         }
