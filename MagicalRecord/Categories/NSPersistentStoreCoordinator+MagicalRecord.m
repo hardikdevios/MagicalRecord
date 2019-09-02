@@ -95,8 +95,8 @@ NSString * const kMagicalRecordPSCMismatchCouldNotRecreateStore = @"kMagicalReco
     {
         if ([MagicalRecord shouldDeleteStoreOnModelMismatch])
         {
-            BOOL isMigrationError = (([error code] == NSPersistentStoreIncompatibleVersionHashError) || ([error code] == NSMigrationMissingSourceModelError) || ([error code] == NSMigrationError));
-            if ([[error domain] isEqualToString:NSCocoaErrorDomain] && isMigrationError)
+//            BOOL isMigrationError = (([error code] == NSPersistentStoreIncompatibleVersionHashError) || ([error code] == NSMigrationMissingSourceModelError) || ([error code] == NSMigrationError));
+            if ([[error domain] isEqualToString:NSCocoaErrorDomain])
             {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMagicalRecordPSCMismatchWillDeleteStore object:nil];
                 
