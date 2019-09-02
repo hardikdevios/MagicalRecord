@@ -88,9 +88,9 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
 {
     NSEntityDescription *destinationEntity = [relationshipInfo destinationEntity];
     NSManagedObject *objectForRelationship = nil;
-
+    
     id relatedValue;
-
+    
     // if its a primitive class, than handle singleRelatedObjectData as the key for relationship
     if ([singleRelatedObjectData isKindOfClass:[NSString class]] ||
         [singleRelatedObjectData isKindOfClass:[NSNumber class]])
@@ -98,24 +98,27 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
         relatedValue = singleRelatedObjectData;
     }
     else if ([singleRelatedObjectData isKindOfClass:[NSDictionary class]])
-	{
-		relatedValue = [singleRelatedObjectData MR_relatedValueForRelationship:relationshipInfo];
-	}
-	else
+    {
+        relatedValue = [singleRelatedObjectData MR_relatedValueForRelationship:relationshipInfo];
+    }
+    else
     {
         relatedValue = singleRelatedObjectData;
     }
-
+    
     if (relatedValue)
     {
         NSManagedObjectContext *context = [self managedObjectContext];
         Class managedObjectClass = NSClassFromString([destinationEntity managedObjectClassName]);
         NSString *primaryKey = [relationshipInfo MR_primaryKey];
-        objectForRelationship = [managedObjectClass MR_findFirstByAttribute:primaryKey
-																  withValue:relatedValue
-																  inContext:context];
+        if (primaryKey) {
+            objectForRelationship = [managedObjectClass MR_findFirstByAttribute:primaryKey
+                                                                      withValue:relatedValue
+                                                                      inContext:context];
+            
+        }
     }
-	
+    
     return objectForRelationship;
 }
 
